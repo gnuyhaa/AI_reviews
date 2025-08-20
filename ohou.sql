@@ -37,3 +37,23 @@ SELECT *
 FROM tb_reviews
 WHERE goodsID = 1
 ORDER BY event_date DESC, reviewID DESC;
+
+
+
+-- 분석 
+CREATE TABLE tb_analyzer (
+
+  productID INT,
+  clean_name VARCHAR(255),
+  reviewID INT NOT NULL UNIQUE,
+  comment LONGTEXT,
+  grade FLOAT,
+  keywords VARCHAR(255)
+  
+);
+
+CREATE TABLE tb_category (
+
+  category ENUM("배송","사용감","사이즈","디자인","품질"),
+
+);
