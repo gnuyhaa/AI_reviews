@@ -51,7 +51,7 @@ def product_list():
             }
         )
 
-    return result[:2]  # 상품2개만 테스트
+    return result[:4]  # 상품4개 가져오기
 
 
 # 상품 리뷰 크롤링
