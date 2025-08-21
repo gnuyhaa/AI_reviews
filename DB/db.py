@@ -1,6 +1,8 @@
 import pymysql
 from dotenv import load_dotenv
 import os
+import re
+from tqdm import tqdm
 
 # DB 연결
 def dbcon():
@@ -90,3 +92,92 @@ def insert_product_review(reviews):
     finally:
         conn.close()
 
+
+
+# 분석테이블 전처리 된 상품목록 DB 저장
+def insert_product_list():
+    conn = dbcon()
+    try:
+        with conn.cursor() as cur:
+            # tb_products에서 모든 상품 가져오기
+            cur.execute("SELECT productID, product_name FROM tb_products")
+            result = cur.fetchall()
+
+            for productID, name in result:
+                clean_name = re.sub(r"\[.*?\]", "", name)  # 괄호 제거 등 전처리
+
+                # 중복 발생 시 clean_name만 업데이트
+                cur.execute(
+                    """
+                    INSERT INTO tb_analyze_products (productID, clean_name)
+                    VALUES (%s, %s)
+                    ON DUPLICATE KEY UPDATE clean_name=VALUES(clean_name)
+                    """,
+                    (productID, clean_name)
+                )
+
+            conn.commit()
+            print("분석DB에 전처리 상품목록 저장 완료! (중복 처리 포함)")
+    finally:
+        conn.close()
+
+# 분석테이블에 전처리된 리뷰내용 DB 저장
+def insert_clean_review(exclude_texts=None):
+    if exclude_texts is None:
+        exclude_texts = ["최고예요", "마음에 들어요", "보통이에요", "별로예요", "매우 아쉬워요"]
+
+    conn = dbcon()
+    try:
+        with conn.cursor() as cur:
+            # 원본 리뷰 불러오기
+            cur.execute("SELECT reviewID, comment FROM tb_reviews")
+            result = cur.fetchall()
+
+            inserted_reviews = []
+
+            for review_id, review_text in result:
+                if review_text in exclude_texts:
+                    continue  # 제외
+
+                inserted_reviews.append((review_id, review_text))
+
+                # tb_analyze에 삽입
+                cur.execute(
+                    "INSERT INTO tb_analyze (reviewID, comment) VALUES (%s, %s)",
+                    (review_id, review_text)
+                )
+
+            conn.commit()
+            print(f"분석DB에 전처리 리뷰 저장 완료! 총 {len(inserted_reviews)}개 삽입")
+
+    finally:
+        conn.close()
+
+
+# 분석테이블에 LLM (리뷰 카테고리, 키워드 ,감성) 분석 내용 DB 저장
+def insert_analyze_review(all_results):
+    conn = dbcon()
+    try:
+        with conn.cursor() as cur:
+            for item in tqdm(all_results, desc="DB 저장 진행"):
+                cur.execute(
+                    """
+                    INSERT INTO tb_analyze (reviewID, sentence, category, keywords, sentiment)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        category=VALUES(category),
+                        keywords=VALUES(keywords),
+                        sentiment=VALUES(sentiment)
+                    """,
+                    (
+                        item["review_id"],
+                        item["sentence"],
+                        item["category"],
+                        ",".join(item["keywords"]),
+                        item["sentiment"]
+                    )
+                )
+        conn.commit()
+        print(f"분석DB에 LLM 분석 결과 저장 완료! 총 {len(all_results)}개 삽입")
+    finally:
+        conn.close()
