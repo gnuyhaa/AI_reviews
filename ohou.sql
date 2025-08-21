@@ -40,20 +40,24 @@ ORDER BY event_date DESC, reviewID DESC;
 
 
 
--- 분석 
-CREATE TABLE tb_analyzer (
-
+-- 분석
+CREATE TABLE tb_analyze (
+  analyzeID INT AUTO_INCREMENT PRIMARY KEY,
   productID INT,
+  reviewID INT NOT NULL,
   clean_name VARCHAR(255),
-  reviewID INT NOT NULL UNIQUE,
-  comment LONGTEXT,
-  grade FLOAT,
-  keywords VARCHAR(255)
-  
+  sentence LONGTEXT,
+  category VARCHAR(255),
+  keywords VARCHAR(255),
+  sentiment VARCHAR(255)
 );
 
-CREATE TABLE tb_category (
 
-  category ENUM("배송","사용감","사이즈","디자인","품질"),
+-- 키워드 테이블 .. 만들기 
 
+
+-- 상품 전처리 테이블 만들기 ...
+CREATE TABLE tb_analyze_products (
+    productID BIGINT PRIMARY KEY,
+    clean_name VARCHAR(255)
 );
