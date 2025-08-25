@@ -5,30 +5,42 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from tqdm import tqdm
 
-## 분석 돌릴 리뷰 전처리 
+
+## 분석 돌릴 리뷰 전처리
 def clean_reviews(exclude_texts=None):
     if exclude_texts is None:
-        exclude_texts = ["최고예요", "마음에 들어요", "보통이에요", "별로예요", "매우 아쉬워요"]
+        exclude_texts = [
+            "최고예요",
+            "마음에 들어요",
+            "보통이에요",
+            "별로예요",
+            "매우 아쉬워요",
+        ]
 
     conn = dbcon()
     inserted_reviews = []
 
     with conn.cursor() as cur:
-        cur.execute("SELECT reviewID, comment FROM tb_reviews")
+        # 리뷰 + 상품명 가져오기
+        cur.execute(
+            """
+            SELECT r.reviewID, r.comment, p.ID
+            FROM tb_reviews r
+            JOIN tb_products p ON r.goodsID = p.ID
+        """
+        )
         result = cur.fetchall()
-        for review_id, review_text in result:
+
+        for review_id, review_text, product_ID in result:
             if review_text in exclude_texts:
                 continue
-            inserted_reviews.append((review_id, review_text))
+            inserted_reviews.append((review_id, review_text, product_ID))
 
     print(f"제거완료, 분석할 리뷰 수 {len(inserted_reviews)}개")
     return inserted_reviews
 
 
-
-
-
-# 리뷰 카테고리, 키워드, 감성 분류 
+# 리뷰 카테고리, 키워드, 감성 분류
 dbcon()
 llm = ChatOpenAI(model="gpt-4o-mini")
 
@@ -64,7 +76,7 @@ keyword_prompt = ChatPromptTemplate.from_template(
     Extract 1-5 **nouns only** from the following sentence. 
     Exclude general emotion words like "좋아요", "만족", "최고".
     If no obvious product-related noun exists, pick the most meaningful noun in the sentence.
-    Return result in JSON format.
+    Return result in **strict JSON format**, do not include any backslashes (\).
 
     Sentence: "{sentence}"
 
@@ -95,16 +107,17 @@ sentiment_prompt = ChatPromptTemplate.from_template(
 )
 sentiment_chain = sentiment_prompt | llm | JsonOutputParser()
 
+
 # 실행
 def analyze_reviews(inserted_reviews):
     all_results = []
 
-    for rid, rtext in tqdm(inserted_reviews[:10], desc = "리뷰 분석 진행"): # 테스트 10개
+    for rid, rtext, productID in tqdm(inserted_reviews, desc="리뷰 분석 진행"):
         # 리뷰를 문장 단위로 분리
         sentences = re.split(r"(?<=[.!?])[\s\n]+", rtext)
         sentences = [s.strip() for s in sentences if s.strip()]  # 빈문장 제거
 
-        for sent in tqdm(sentences, desc = f"리뷰ID {rid}문장 분석", leave=False):
+        for sent in tqdm(sentences, desc=f"리뷰ID {rid}문장 분석", leave=False):
             if not sent.strip():
                 continue
 
@@ -120,6 +133,7 @@ def analyze_reviews(inserted_reviews):
 
                 all_results.append(
                     {
+                        "productID": productID,
                         "review_id": rid,
                         "sentence": sent,
                         "category": category_result["category"],
