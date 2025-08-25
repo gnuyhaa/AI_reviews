@@ -32,6 +32,50 @@ CREATE TABLE tb_reviews (
 		FOREIGN KEY (goodsID) REFERENCES tb_products(ID)
 );
 
+-- 분석
+
+CREATE TABLE tb_analyze (
+    analyzeID INT AUTO_INCREMENT PRIMARY KEY,
+    productID INT NOT NULL,
+    reviewID INT NOT NULL,
+    sentence LONGTEXT,
+    sentiment VARCHAR(255),
+    FOREIGN KEY (productID) REFERENCES tb_products(ID)
+);
+
+-- 상품 전처리 테이블 만들기 ...
+CREATE TABLE tb_analyze_products (
+  productID INT PRIMARY KEY,
+  clean_name VARCHAR(255),
+
+	FOREIGN KEY (productID) REFERENCES tb_products(ID)
+);
+
+-- 카테고리 테이블 만들기 
+CREATE TABLE tb_categories (
+  categoryID INT AUTO_INCREMENT PRIMARY KEY,
+  category VARCHAR(255)
+);
+
+insert into tb_categories (category) values ('배송');
+insert into tb_categories (category) values ('사용감');
+insert into tb_categories (category) values ('사이즈');
+insert into tb_categories (category) values ('디자인');
+insert into tb_categories (category) values ('품질');
+
+
+-- 키워드 테이블 .. 만들기 
+CREATE TABLE tb_keywords (
+  keyword_id INT AUTO_INCREMENT PRIMARY KEY,
+  productID INT NOT NULL,
+  categoryID INT NOT NULL,
+  keyword VARCHAR(50) NOT NULL,
+  count INT NOT NULL DEFAULT 1,
+
+	FOREIGN KEY (productID) REFERENCES tb_analyze_products(productID),
+	FOREIGN KEY (categoryID) REFERENCES tb_categories(categoryID)
+);
+
 
 SELECT *
 FROM tb_reviews
@@ -39,25 +83,13 @@ WHERE goodsID = 1
 ORDER BY event_date DESC, reviewID DESC;
 
 
-
--- 분석
-CREATE TABLE tb_analyze (
-  analyzeID INT AUTO_INCREMENT PRIMARY KEY,
-  productID INT,
-  reviewID INT NOT NULL,
-  clean_name VARCHAR(255),
-  sentence LONGTEXT,
-  category VARCHAR(255),
-  keywords VARCHAR(255),
-  sentiment VARCHAR(255)
-);
-
-
--- 키워드 테이블 .. 만들기 
-
-
--- 상품 전처리 테이블 만들기 ...
-CREATE TABLE tb_analyze_products (
-    productID BIGINT PRIMARY KEY,
-    clean_name VARCHAR(255)
-);
+-- 리뷰별로 키워드 join 
+SELECT 
+    a.reviewID,
+    a.sentence,
+    a.sentiment,
+    GROUP_CONCAT(k.keyword) AS keywords
+FROM tb_analyze a
+LEFT JOIN tb_keywords k
+    ON a.productID = k.productID
+GROUP BY a.reviewID, a.sentence, a.sentiment;
