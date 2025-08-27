@@ -13,7 +13,8 @@
 
 ## 프로젝트 결과
 
-![alt text](<image (5).png>)
+<img width="239" height="554" alt="image (5)" src="https://github.com/user-attachments/assets/9d88dfb0-53b6-4e32-9daf-8d6951145dff" />
+
 
 - 사이드바에서 select box를 통해 상품 선택
 
