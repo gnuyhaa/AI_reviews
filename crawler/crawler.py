@@ -1,4 +1,4 @@
-from DB.db import get_latest_review_id
+from db.db import get_latest_review_id
 from bs4 import BeautifulSoup
 import requests
 
@@ -107,3 +107,9 @@ def product_review(pages=10):
                 break  # 더 이전 페이지 리뷰 수집 중단
 
     return all_reviews
+
+# # crawler -> analyzer
+# # 크롤링 다음에 분석 실행하겠다 
+# import os
+
+# os.system('docker start analyzer')
