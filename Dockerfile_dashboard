@@ -1,0 +1,32 @@
+# 기본 베이스가 되는 이미지 설정 (python이 설치된 환경)
+FROM python:3.11-slim
+
+# 컨테이너 내부의 작업 경로 설정
+WORKDIR /app
+
+# OS상 필요한 소프트웨어들을 설치
+RUN apt-get update && apt-get install -y \
+    fonts-nanum \
+    build-essential \
+    curl \
+ && rm -rf /var/lib/apt/lists/*
+
+# 파이썬 라이브러리 의존성을 복사
+COPY requirements.txt .
+
+# 파이썬 라이브러리 설치
+RUN pip3 install -r requirements.txt
+
+# 현재 경로에 있는 필요한 소스코드들 모두 복사
+# 이미지를 만들때의 현재 경로는 docker-compose.yml의 context에 있는 경로를 기준으로 한다.
+COPY . .
+
+# 대시보드 app.py 파일이 만약에 폴더 안에 있으면,
+# WORKDIR /app/visualization
+
+EXPOSE 8501
+
+# HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+# streamlit_app.py를 내가 실행할 python파일 이름으로 변경
+ENTRYPOINT ["streamlit", "run", "visualize/ohou_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
