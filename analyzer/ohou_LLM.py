@@ -1,4 +1,4 @@
-from DB.db import dbcon
+from db.db import dbcon
 import re
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
@@ -59,6 +59,8 @@ category_prompt = ChatPromptTemplate.from_template(
     Rules:
     - If no category matches, return "None".
     - Return result in JSON format.
+    - Do not include any backslashes (`\`) or escape sequences. 
+    - If the input sentence has line breaks, replace them with a single space.
 
     Input sentence: "{sentence}"
     Output:
@@ -76,7 +78,9 @@ keyword_prompt = ChatPromptTemplate.from_template(
     Extract 1-5 **nouns only** from the following sentence. 
     Exclude general emotion words like "좋아요", "만족", "최고".
     If no obvious product-related noun exists, pick the most meaningful noun in the sentence.
-    Return result in **strict JSON format**, do not include any backslashes (\).
+    Return result in **strict JSON format**.
+    Do not include any backslashes (`\`) or escape sequences.
+    If the input sentence has line breaks, replace them with a single space.
 
     Sentence: "{sentence}"
 
@@ -94,7 +98,9 @@ sentiment_prompt = ChatPromptTemplate.from_template(
     """
     Determine the sentiment of the given sentence.
     Return "긍정", "부정".
-    Return result in JSON format.
+    Return result in strict JSON format.
+    Do not include any backslashes (`\`) or escape sequences.
+    If the input sentence has line breaks, replace them with a single space.
 
     Sentence: "{sentence}"
 
