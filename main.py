@@ -1,4 +1,4 @@
-from DB.db import insert_product, insert_product_review, insert_product_list, save_analyze_review
+from db.db import insert_product, insert_product_review, insert_product_list, save_analyze_review
 from crawler.crawler import product_list, product_review
 from analyzer.ohou_LLM import clean_reviews, analyze_reviews
 
