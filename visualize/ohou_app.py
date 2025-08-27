@@ -252,6 +252,9 @@ with st.sidebar:
         # selectbox에서 상품명 리스트 사용
         option = st.selectbox("상품 선택", products["productName"].tolist())
 
+st.markdown(f"<h3 style='text-align: center; margin-top: -50px;'>🛍️: {option}</h3>",
+    unsafe_allow_html=True)
+
 # 선택된 상품이 있으면 리뷰 가져오기
 if option:
     # 선택된 상품의 productID 가져오기
@@ -270,7 +273,7 @@ with col1:
         percent = rating / max_rating * 100  if max_rating else 0# 채울 비율 %
 
     st.markdown(
-    "<h3 style='text-align: center;'>요약</h3>",
+    "<h4 style='text-align: center; margin-top: 20px;'>요약</h4>",
     unsafe_allow_html=True
 )
     st.markdown(
@@ -312,7 +315,7 @@ with col1:
 categories = get_categories()
 
 with col2:
-    st.markdown("<h3 style='text-align: center;'>리뷰 AI 분석</h3>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; margin-top: 20px;'>리뷰 AI 분석</h4>", unsafe_allow_html=True)
 
 # ------------------- 카테고리 UI 버튼 -------------------
     if "selected_categories" not in st.session_state:
@@ -352,12 +355,14 @@ with col2:
             sentiment_df = get_sentiment_count(product_id, category_id)
             if not sentiment_df.empty:
                 fig, ax = plt.subplots()
-                colors = ["#36C5F1", "#FF6C62"]
+                colors = ["#49CBF3", "#FF7D73"]
+                wedgeprops={'width': 0.55, 'edgecolor': 'w', 'linewidth': 4}
                 wedges, _ = ax.pie(
                     sentiment_df["count"],
                     labels=None,
                     startangle=90,
-                    colors=colors
+                    colors=colors,
+                    wedgeprops=wedgeprops
                 )
                 ax.legend(
                     wedges,
@@ -401,9 +406,9 @@ with col2:
                 keyword_colors = {}
                 for _, row in keyword_sentiment_df.iterrows():
                     if row["sentiment"] == "긍정":
-                        keyword_colors[row["keyword"]] = "#99ccff"   # 연한 파랑
+                        keyword_colors[row["keyword"]] = "#96E2F9"   # 연한 파랑
                     else:
-                        keyword_colors[row["keyword"]] = "#ff9999"   # 연한 빨강
+                        keyword_colors[row["keyword"]] = "#fdaaaa"   # 연한 빨강
 
                 for _, row in review_df.iterrows():
                     keywords = row["keywords"].split(",") if row["keywords"] else []
@@ -430,7 +435,7 @@ with col2:
 # 리뷰 키워드 분석
 with col3:
     st.markdown(
-    "<h3 style='text-align: center;'>리뷰 키워드 분석</h3>",
+    "<h4 style='text-align: center; margin-top: 20px;'>리뷰 키워드 분석</h4>",
     unsafe_allow_html=True
     )
     # 선택된 상품이 있으면 키워드 가져오기
