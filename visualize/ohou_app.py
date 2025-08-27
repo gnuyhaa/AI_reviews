@@ -6,9 +6,9 @@ import streamlit as st
 import re
 import pandas as pd
 import matplotlib.pyplot as plt
-from DB.db import dbcon
+from db.db import dbcon
 
-plt.rcParams['font.family'] = 'Malgun Gothic' 
+plt.rcParams['font.family'] = 'NanumGothic' 
 dbcon()
 
 
@@ -271,7 +271,8 @@ with col1:
         rating, review_count = get_rating_and_count(product_id)
         max_rating = 5
         percent = rating / max_rating * 100  if max_rating else 0# 채울 비율 %
-
+    else:
+        rating, review_count, percent, max_rating = 0, 0, 0, 5
     st.markdown(
     "<h4 style='text-align: center; margin-top: 20px;'>요약</h4>",
     unsafe_allow_html=True
