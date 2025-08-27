@@ -18,7 +18,8 @@
 
 - 사이드바에서 select box를 통해 상품 선택
 
-![alt text](<image (6).png>)
+<img width="1660" height="809" alt="image (6)" src="https://github.com/user-attachments/assets/64d938e2-2737-4d85-93fd-2c331764eaef" />
+
 
 - 선택한 **상품을 상단에 표기**하여 어떤 상품에 대한 리뷰인지 시각적으로 보여줌
 - 요약 컬럼
@@ -30,7 +31,8 @@
 - 리뷰 키워드 분석 컬럼
     - 선택한 상품 리뷰에서 분석된 카테고리 상관없이 **키워드들 중 상위 10**개를 시각적으로 보여줌
 
-![alt text](<image (7).png>)
+<img width="1511" height="809" alt="image (7)" src="https://github.com/user-attachments/assets/f23de8cb-3c21-45e7-81ec-ee49ef2ebb51" />
+
 
 - 리뷰 내용 컬럼
     - 상단에서 선택한 카테고리에 속한 키워드들이 들어간 **리뷰들의 내용**을 시각적으로 보여줌
